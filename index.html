@@ -99,6 +99,22 @@ td.off:hover{color:var(--blue-d);text-decoration:underline}
 /* modo público / administrador */
 body:not(.admin) .admin-only,body:not(.admin) #srcbox,body:not(.admin) #reset{display:none!important}
 .pubbtn{background:#148030!important;color:#fff!important;margin-top:8px}
+/* viñetas */
+.bl{display:grid;grid-template-columns:minmax(130px,240px) 1fr 130px;gap:10px;align-items:center;padding:3px 6px;border-radius:4px;cursor:pointer}
+.bl:hover{background:#eef5fc}.bl.sel{background:#fff3e4}
+.bl .nm{font:600 12px 'Barlow';white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bl .tr{position:relative;height:24px;background:#f9d9d6;border-radius:3px;overflow:hidden}
+.bl .tr>span{position:absolute;top:0;bottom:0}
+.bl .tr .g{left:0;background:#d8efdf}.bl .tr .y{background:#fbefc4}
+.bl .tr .m{top:8px;bottom:8px;left:0;background:#1e2f4b;border-radius:0 3px 3px 0}
+.bl .tr .t{top:2px;bottom:2px;width:3px;background:#e8590c;border-radius:1px;margin-left:-1.5px}
+.bl .v{font:500 12px 'Barlow';text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.bl.ax{cursor:default;padding-top:0}.bl.ax:hover{background:none}
+.bl .ticks{display:flex;justify-content:space-between;font:500 11px 'Barlow';color:var(--muted)}
+@media (max-width:700px){.bl{grid-template-columns:1fr}.bl .v{text-align:left}}
+.seg{display:flex;border:1px solid #bfe0c9;border-radius:6px;overflow:hidden}
+.seg button{background:#fff;border:0;padding:6px 11px;font:600 12px 'Barlow';color:var(--green);cursor:pointer}
+.seg button.on{background:var(--green);color:#fff}
 /* ticker */
 .ticker-wrap{margin:10px 16px 0;background:#05080d;border:3px solid #fff;border-radius:16px;box-shadow:0 0 0 1px #c3cfdd,0 2px 8px rgba(0,0,0,.2);overflow:hidden;padding:9px 0}
 .ticker{display:inline-flex;white-space:nowrap;animation:tick 60s linear infinite;will-change:transform}
@@ -173,7 +189,7 @@ body:not(.admin) .admin-only,body:not(.admin) #srcbox,body:not(.admin) #reset{di
   <div class="h-scope" id="scope">NIVEL NACIONAL</div>
   <div class="h-period"><div class="p1" id="period"></div><div class="p2" id="norip"></div></div>
 </header>
-<div class="ticker-wrap" title="Top 15 oficinas más atrasadas · pase el mouse para pausar"><div class="ticker" id="ticker"></div></div>
+<div class="ticker-wrap" title="Top 15 oficinas con más radicados sin finalizar · pase el mouse para pausar"><div class="ticker" id="ticker"></div></div>
 <main>
   <section class="sec">
     <h2>Indicadores de atraso</h2>
@@ -184,7 +200,7 @@ body:not(.admin) .admin-only,body:not(.admin) #srcbox,body:not(.admin) #reset{di
 
   <section class="sec warm" id="topsec">
     <div class="thead">
-      <div><h2>Top 15 oficinas más atrasadas</h2><div class="sub" id="tsub"></div></div>
+      <div><h2>Top 15 oficinas con más radicados sin finalizar</h2><div class="sub" id="tsub"></div></div>
       <div class="tools">
         <button id="zm" title="Reducir zoom">−</button><span id="zv">100%</span><button id="zp" title="Aumentar zoom">+</button>
         <button id="fs">⛶ Pantalla completa</button>
@@ -203,7 +219,7 @@ body:not(.admin) .admin-only,body:not(.admin) #srcbox,body:not(.admin) #reset{di
     </section>
     <section class="sec cool">
       <h2>Atrasos por fecha · Top 5 oficinas</h2>
-      <div class="sub">Evolución diaria de las 5 oficinas más atrasadas en la fecha seleccionada</div>
+      <div class="sub">Evolución diaria de las 5 oficinas con más radicados sin finalizar en la fecha seleccionada</div>
       <div class="legend" id="c2leg"></div>
       <div class="chartbox"><canvas id="c2"></canvas></div>
     </section>
@@ -220,6 +236,32 @@ body:not(.admin) .admin-only,body:not(.admin) #srcbox,body:not(.admin) #reset{di
       <h2>Top 15 · composición por etapa</h2>
       <div class="sub">Atrasos acumulados por etapa en cada oficina</div>
       <div class="chartbox tall"><canvas id="c4"></canvas></div>
+    </section>
+  </div>
+  <section class="sec">
+    <h2>Gráfico de viñetas · radicados sin finalizar vs radicados</h2>
+    <div class="sub">Top 15 oficinas con más radicados sin finalizar · clic en una fila para filtrar</div>
+    <div class="legend">
+      <span><i style="background:#1e2f4b;height:6px;vertical-align:2px"></i>Total atrasos (barra)</span>
+      <span><i style="background:#e8590c;width:4px;height:12px"></i>Radicados (marca)</span>
+      <span><i style="background:#d8efdf;border:1px solid #b8dcc4"></i>Sin atraso</span>
+      <span><i style="background:#fbefc4;border:1px solid #ecd98c"></i>Intermedia</span>
+      <span><i style="background:#f9d9d6;border:1px solid #eab3ae"></i>Atrasada</span>
+    </div>
+    <div id="bullet"></div>
+  </section>
+  <div class="row r2">
+    <section class="sec cool">
+      <div class="thead">
+        <div><h2>Gráfico de cascada</h2><div class="sub" id="wfsub"></div></div>
+        <div class="seg" id="wfseg"><button data-m="comp" class="on">Composición</button><button data-m="var">Variación</button></div>
+      </div>
+      <div class="chartbox"><canvas id="c6"></canvas></div>
+    </section>
+    <section class="sec">
+      <h2>Gráfico de dispersión</h2>
+      <div class="sub">Radicados vs total atrasos por oficina · clic en un punto para filtrar</div>
+      <div class="chartbox"><canvas id="c7"></canvas></div>
     </section>
   </div>
 </main>
@@ -472,7 +514,7 @@ function render(){
   const pc=(x,y)=>y? (100*x/y).toFixed(1).replace('.',',')+' %':'—';
   $('pcts').innerHTML = [
     {t:'Atrasos / Radicados',v:pc(atr,rad),f:'Total atrasos / Radicados',c:'#d9534f'},
-    {t:'Oficinas atrasadas',v:`${fmt(nAt)} / ${fmt(rows.length)}`,f:'1 − Rad/(Atrasos − Rad) > 30 %',c:'#f0c419',extra:`<div class="lx"><label>Días hábiles <input type="number" id="dias" min="1" max="31" value="${daysFor(d)}"></label><button id="xlLate">⬇ Excel oficinas atrasadas</button></div>`},
+    {t:'Oficinas atrasadas',v:`${fmt(nAt)} / ${fmt(rows.length)}`,f:'Oficinas atrasadas / evaluadas',c:'#f0c419',extra:`<div class="lx"><label>Días hábiles <input type="number" id="dias" min="1" max="31" value="${daysFor(d)}"></label><button id="xlLate">⬇ Excel oficinas atrasadas</button></div>`},
     {t:'Concentración Top 15',v:pc(top,natl),f:'Atrasos del Top 15 / atrasos nacionales',c:'#1f6fb5'},
     {t:'Etapa más atrasada',v:big&&big.v>0?big.n:'—',f:big?`${fmt(big.v)} trámites`:'',c:'#9b7be0',small:true}
   ].map(p=>`<div class="pct" style="--c:${p.c};border-top-color:${p.c}"><div class="t">${p.t}</div><div class="v" style="${p.small?'font-size:24px;padding:5px 0':''}">${p.v}</div><div class="f">${p.f}</div>${p.extra||''}</div>`).join('');
@@ -509,7 +551,82 @@ const grid={color:'rgba(120,140,170,.18)'};
 function mk(id,cfg){ if(charts[id]) charts[id].destroy(); charts[id]=new Chart($(id),cfg); }
 const noLegend={legend:{display:false}};
 
+
+/* ---------- viñetas, cascada y dispersión ---------- */
+S.wf='comp';
+$('wfseg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; S.wf=b.dataset.m; renderWaterfall(curDate()); });
+function selectOffice(o){ S.office=o; fillOffices(); render(); }
+
+function renderBullet(d){
+  const rows=rowsAt(d).slice().sort((a,b)=>b.ATRASOS_OFICINA-a.ATRASOS_OFICINA).slice(0,15);
+  const max=Math.max(1,...rows.map(r=>Math.max(r.ATRASOS_OFICINA,r.RADICADOS*(1+lateLimit(r.RADICADOS)/100))))*1.04;
+  const w=x=>(100*Math.min(Math.max(x,0),max)/max).toFixed(2)+'%';
+  const h=rows.map(r=>{
+    const R=r.RADICADOS,T=r.ATRASOS_OFICINA,lim=R*(1+lateLimit(R)/100);
+    const tip=`${r.OFICINA}\nTotal atrasos: ${fmt(T)}\nRadicados: ${fmt(R)}`;
+    return `<div class="bl ${r.OFICINA===S.office?'sel':''}" data-o="${esc(r.OFICINA)}" title="${esc(tip)}">
+      <div class="nm">${esc(r.OFICINA)}</div>
+      <div class="tr"><span class="g" style="width:${w(R)}"></span><span class="y" style="left:${w(R)};width:calc(${w(lim)} - ${w(R)})"></span><span class="m" style="width:${w(T)}"></span><span class="t" style="left:${w(R)}"></span></div>
+      <div class="v"><b>${fmt(T)}</b> / ${fmt(R)}</div></div>`;
+  }).join('');
+  const tk=[0,.25,.5,.75,1].map(f=>`<span>${fmt(Math.round(max*f))}</span>`).join('');
+  $('bullet').innerHTML=h+`<div class="bl ax"><div></div><div class="ticks">${tk}</div><div></div></div>`;
+  $('bullet').querySelectorAll('.bl[data-o]').forEach(el=>el.onclick=()=>selectOffice(el.dataset.o));
+}
+
+const wfPlugin={id:'wf',afterDatasetsDraw(chart){
+  const o=chart.options.plugins.wf; if(!o) return;
+  const {ctx,scales:{y}}=chart, meta=chart.getDatasetMeta(0), ds=chart.data.datasets[0].data;
+  ctx.save(); ctx.font="600 12px 'Barlow','Segoe UI',sans-serif"; ctx.textAlign='center'; ctx.fillStyle='#1d2939';
+  meta.data.forEach((bar,i)=>{
+    const [a,b]=ds[i]; const top=y.getPixelForValue(Math.max(a,b));
+    ctx.fillText(o.labels[i],bar.x,top-6);
+    if(i<ds.length-1){ const lv=y.getPixelForValue(o.ends[i]), nx=meta.data[i+1];
+      ctx.strokeStyle='#8793a8'; ctx.lineWidth=1; ctx.setLineDash([3,3]); ctx.beginPath(); ctx.moveTo(bar.x+bar.width/2,lv); ctx.lineTo(nx.x-nx.width/2,lv); ctx.stroke(); ctx.setLineDash([]); }
+  });
+  ctx.restore();
+}};
+function renderWaterfall(d){
+  const ds=dates(), prev=ds[ds.indexOf(d)-1];
+  $('wfseg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.m===S.wf));
+  const cur=scoped(d), pr=prev?scoped(prev):null;
+  let mode=S.wf; if(mode==='var' && !pr){ mode='comp'; }
+  const scope=S.office==='ALL'?'Nivel nacional':S.office;
+  const labels=[],data=[],colors=[],txt=[],ends=[]; let cum=0;
+  if(mode==='comp'){
+    $('wfsub').textContent=`${scope} · cómo se compone el total de atrasos (${fdate(d)})`+(pr?'':' · la vista Variación requiere dos fechas cargadas');
+    STAGES.forEach(s=>{ const v=sumOf(cur,s.k); labels.push(s.n); data.push([cum,cum+v]); colors.push(s.c); txt.push(fmt(v)); cum+=v; ends.push(cum); });
+    labels.push('Total atrasos'); data.push([0,cum]); colors.push('#1e2f4b'); txt.push(fmt(cum)); ends.push(cum);
+  }else{
+    $('wfsub').textContent=`${scope} · variación por etapa entre ${fdate(prev)} y ${fdate(d)} · rojo: aumenta el atraso · verde: disminuye`;
+    STAGES.forEach(s=>{ const v=sumOf(cur,s.k)-sumOf(pr,s.k); labels.push(s.n); data.push([cum,cum+v]); colors.push(v>0?'#d9534f':v<0?'#2e9d4f':'#b7c1d0'); txt.push((v>0?'+':'')+fmt(v)); cum+=v; ends.push(cum); });
+    labels.push('Variación total'); data.push([0,cum]); colors.push('#1e2f4b'); txt.push((cum>0?'+':'')+fmt(cum)); ends.push(cum);
+  }
+  mk('c6',{type:'bar',data:{labels,datasets:[{data,backgroundColor:colors,borderRadius:3,maxBarThickness:56}]},plugins:[wfPlugin],
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20}},
+      plugins:{legend:{display:false},wf:{labels:txt,ends},tooltip:{callbacks:{label:c=>' '+txt[c.dataIndex]}}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{beginAtZero:true,grid,ticks:{callback:v=>fmt(v)}}}}});
+}
+
+function renderScatter(d){
+  const all=rowsAt(d), late=[], ok=[]; let mx=1;
+  all.forEach(r=>{ const i=lateInfo(r); const p={x:r.RADICADOS,y:r.ATRASOS_OFICINA,o:r.OFICINA,pct:i.pct}; (i.late?late:ok).push(p); mx=Math.max(mx,r.RADICADOS); });
+  const sel=S.office==='ALL'?[]:all.filter(r=>r.OFICINA===S.office).map(r=>({x:r.RADICADOS,y:r.ATRASOS_OFICINA,o:r.OFICINA,pct:lateInfo(r).pct}));
+  const lim=mx*1.05;
+  mk('c7',{type:'scatter',data:{datasets:[
+    {label:'Oficinas atrasadas',data:late,pointStyle:'triangle',radius:5,hoverRadius:8,backgroundColor:'rgba(217,83,79,.8)',borderColor:'#fff',borderWidth:1},
+    {label:'Sin atraso',data:ok,pointStyle:'circle',radius:4,hoverRadius:7,backgroundColor:'rgba(31,111,181,.65)',borderColor:'#fff',borderWidth:1},
+    {label:'Oficina seleccionada',data:sel,pointStyle:'rectRot',radius:10,hoverRadius:11,backgroundColor:'rgba(240,138,93,0)',borderColor:'#f08a5d',borderWidth:3},
+    {type:'line',label:'Umbral de atraso',data:limitLine(lim),borderColor:'#8793a8',borderDash:[6,4],borderWidth:1.5,pointRadius:0,pointHoverRadius:0,fill:false}
+  ]},options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:9,boxHeight:9}},
+      tooltip:{filter:i=>i.datasetIndex<3,callbacks:{title:i=>i[0].raw.o,label:c=>[` Radicados: ${fmt(c.raw.x)}`,` Total atrasos: ${fmt(c.raw.y)}`]}}},
+    scales:{x:{title:{display:true,text:'Radicados'},beginAtZero:true,grid,ticks:{callback:v=>fmt(v)}},y:{title:{display:true,text:'Total atrasos'},beginAtZero:true,grid,ticks:{callback:v=>fmt(v)}}},
+    onClick:(e,els)=>{ if(els.length){ const el=els[0]; if(el.datasetIndex<3){ const o=charts.c7.data.datasets[el.datasetIndex].data[el.index].o; selectOffice(o); } } }}});
+}
+
 function renderCharts(d){
+  renderBullet(d); renderWaterfall(d); renderScatter(d);
   const ds=dates(); const labels=ds.map(fdate);
   const single = ds.length<2;
 
@@ -589,7 +706,7 @@ function exportExcel(){
   const wb=XLSX.utils.book_new();
   const ws1=XLSX.utils.aoa_to_sheet([hdr,...rows.slice(0,15).map(line)]);
   ws1['!cols']=[{wch:9},{wch:38},{wch:12},...COLS.map(()=>({wch:16}))];
-  XLSX.utils.book_append_sheet(wb,ws1,'Top 15 atrasos');
+  XLSX.utils.book_append_sheet(wb,ws1,'Top 15 sin finalizar');
   const ws2=XLSX.utils.aoa_to_sheet([hdr,...rows.map(line)]);
   ws2['!cols']=ws1['!cols'];
   XLSX.utils.book_append_sheet(wb,ws2,'Todas las oficinas');
@@ -597,7 +714,7 @@ function exportExcel(){
   const ws3=XLSX.utils.aoa_to_sheet([['Oficina','Fecha',...COLS.map(c=>c.n)],...hist.map(r=>[r.OFICINA,fdate(r.FECHA),...COLS.map(c=>r[c.k])])]);
   ws3['!cols']=[{wch:38},{wch:12},...COLS.map(()=>({wch:16}))];
   XLSX.utils.book_append_sheet(wb,ws3,'Histórico');
-  XLSX.writeFile(wb,`Top15_Atrasos_${d}.xlsx`);
+  XLSX.writeFile(wb,`Top15_Radicados_Sin_Finalizar_${d}.xlsx`);
   toast('Excel exportado: Top 15, todas las oficinas e histórico');
 }
 $('xl').onclick=exportExcel;
@@ -621,13 +738,21 @@ function renderTicker(d){
 }
 
 /* ---------- regla de oficinas atrasadas ---------- */
-const LATE_PCT = 30;
-/* R = radicados, T = total atrasos, D = T − R.  Solo se evalúa si D ≥ R (y D > 0):
-   porcentaje = (1 − R/D)·100 ; atrasada si porcentaje > 30 % */
+/* Umbral (en %) según el número de radicados de la oficina */
+function lateLimit(R){ return R<=50?0 : R<=100?3 : R<=499?10 : R<=999?20 : 40; }
+/* R = radicados, T = total atrasos. Se evalúa solo si (T − R) > 0 y R > 0.
+   porcentaje = (T − R)/R · 100 ; atrasada si el porcentaje supera el umbral de su rango */
 function lateInfo(r){
   const R=+r.RADICADOS||0, T=+r.ATRASOS_OFICINA||0, D=T-R;
-  if(D>0 && D>=R){ const pct=(1-R/D)*100; return {pct, late:pct>LATE_PCT}; }
-  return {pct:null, late:false};
+  if(D>0 && R>0){ const pct=100*D/R, u=lateLimit(R); return {pct, u, late:pct>u}; }
+  return {pct:null, u:null, late:false};
+}
+/* línea del umbral para la dispersión: y = x·(1+u), escalonada por rango, con cortes entre rangos */
+function limitLine(mx){
+  const out=[]; [[0,50],[51,100],[101,499],[500,999],[1000,Infinity]].forEach(([a,b])=>{
+    if(a>mx) return; const e=Math.min(b,mx), k=1+lateLimit(Math.max(a,1))/100;
+    out.push({x:a,y:a*k},{x:e,y:e*k},{x:e,y:null});
+  }); return out;
 }
 /* días hábiles (lunes a viernes) de la semana de la fecha de corte, hasta esa fecha */
 function bizDays(iso){ const [y,m,d]=iso.split('-').map(Number); const dow=(new Date(y,m-1,d).getDay()+6)%7; return Math.min(5,dow+1); }
@@ -645,7 +770,6 @@ function exportLate(){
   ws['!cols']=[{wch:40},{wch:27},{wch:15},{wch:13}];
   const info=XLSX.utils.aoa_to_sheet([
     ['Fecha de corte',fdate(d)],['Días hábiles (L–V) usados',nd],['Oficinas atrasadas',list.length],['Oficinas evaluadas',rowsAt(d).length],
-    ['Regla','Se evalúa si (Total atrasos − Radicados) ≥ Radicados. Porcentaje = 1 − Radicados/(Total atrasos − Radicados). Atrasada si > 30 %.'],
     ['Radicados promedio diarios','Radicados ÷ días hábiles']]);
   info['!cols']=[{wch:28},{wch:100}];
   const wb=XLSX.utils.book_new();
